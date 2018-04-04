@@ -24,7 +24,7 @@ MODULE_DESCRIPTION("Assignment 3 COP4600");
 MODULE_VERSION("1.0");
 
 static int 		Major;	//major number assigned to our device driver
-extern static char 	msg[BUFF_LEN];	//the msg the device will give when asked
+extern static char 	*msg;	//the msg the device will give when asked
 static int 		counter = 0;
 extern static short	size_of_message;
 extern struct mutex charMutex;
