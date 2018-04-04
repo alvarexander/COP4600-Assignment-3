@@ -14,25 +14,26 @@ account for mutex locks in code
 #include <linux/mutex.h>
 
 #define SUCCESS 0
-#define DEVICE_NAME "chardev"	//device name as it appears in /proc/devices
+#define DEVICE_NAME "outputDev"	//device name as it appears in /proc/devices
 #define CLASS_NAME "chardriver"
 #define BUFF_LEN 1024			//max length of message
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Erick Evangeliste, Eric Watson, Leonardo Araque");
+MODULE_AUTHOR("Erick Evangeliste, Eric Watson, Alexander ALvarez");
 MODULE_DESCRIPTION("Assignment 3 COP4600");
 MODULE_VERSION("1.0");
 
-extern static int 		Major;	//major number assigned to our device driver
-static char 	msg[BUFF_LEN];	//the msg the device will give when asked
+static int 		Major;	//major number assigned to our device driver
+extern static char 	msg[BUFF_LEN];	//the msg the device will give when asked
 static int 		counter = 0;
-static short	size_of_message = 0;
+extern static short	size_of_message;
+extern struct mutex charMutex;
 static struct 	class* charClass = NULL;
 static struct 	device* charDevice = NULL;
-static DEFINE_MUTEX(output_mutex);
 static int 		dev_open(struct inode *, struct file *);
 static int 		dev_release(struct inode *, struct file *);
 static ssize_t 	dev_read(struct file *, char *, size_t, loff_t *);
+static ssize_t 	dev_write(struct file *, const char *, size_t, loff_t *);
 
 //Operations struct
 static struct file_operations fops =
@@ -46,7 +47,7 @@ static struct file_operations fops =
 //this function is called when the module is loaded
 static int __init outputDevice_init(void)
 {
-	mutex_init(&output_mutex);
+	mutex_init(&charMutex);
 	Major = register_chrdev(0, DEVICE_NAME, &fops);
 
 	if(Major < 0)
@@ -86,7 +87,7 @@ static int __init outputDevice_init(void)
 //this function is called when the module is unloaded
 static void __exit outputDevice_exit(void)
 {
-	mutex_destroy(&output_mutex);
+	mutex_destroy(&charMutex);
 	device_destroy(charClass, MKDEV(Major, 0));
 	class_unregister(charClass);
 	class_destroy(charClass);
@@ -98,9 +99,9 @@ static void __exit outputDevice_exit(void)
 //called when a process tries to open the device file, like "cat/dev/mycharfile"
 static int dev_open(struct inode *inode, struct file *file)
 {
-	if(!mutex_trylock(&output_mutex))
+	if(!mutex_trylock(&charMutex))
 	{
-		printk(KERN_ALERT "Output mutex: Device in use by another process");
+		printk(KERN_ALERT "Output charMutex: Device in use by another process");
 		return -EBUSY;
 	}
 
@@ -127,6 +128,8 @@ static ssize_t dev_read(struct file * filp, char *buffer, size_t length, loff_t 
 		size_of_message -= length;
 		printk(KERN_INFO "Output: User has obtained %d characters from system, %d bytes are available\n", length, BUFF_LEN - size_of_message);
 
+		mutex_unlock(&charMutex);
+
 		return length;
 	}
 	else
@@ -134,25 +137,38 @@ static ssize_t dev_read(struct file * filp, char *buffer, size_t length, loff_t 
 		for(i = 0; i < BUFF_LEN; i++)
 			msg[i] = '\0';
 
+		mutex_unlock(&charMutex);
+
 		if(size_of_message > 1)
 		{
 			printk(KERN_INFO "Output: User has obtained %d characters from system, %d bytes are available\n", size_of_message, BUFF_LEN);
 			temp = size_of_message;
 			size_of_message = 0;
+	
+			
+
 			return temp;
 		}
 		else
 			return -EFAULT;
 	}
+	
+	
 }
 
 //called when a process closes the device file
 static int dev_release(struct inode *inode, struct file *file)
 {
-	mutex_unlock(&ebbchar_mutex);
+	mutex_unlock(&charMutex);
 	printk(KERN_INFO "Output: Device successfully closed\n");
 	return 0;
 }
 
+static ssize_t dev_write(struct file *filp, const char *buff, size_t length, loff_t * off)
+{
+	printf("The output module does not support writing.\n");
+
+	return -EFAULT;
+}
 module_init(outputDevice_init);
 module_exit(outputDevice_exit);
