@@ -1,4 +1,11 @@
-obj-m += chardev.o
+SRCS   = inputdevice.c outputdevice.c
+OBJS   = $(SRCS:.c=.o)
+
+obj-m += $(OBJS)
 
 all:
-		make -C  /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+	$(MAKE) -C /lib/modules/`uname -r`/build M=$(PWD) modules
+
+clean:
+	$(MAKE) -C /lib/modules/`uname -r`/build M=$(PWD) clean
+	$(RM) Module.markers modules.order
