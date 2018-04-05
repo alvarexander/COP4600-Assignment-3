@@ -14,8 +14,8 @@ account for mutex locks in code
 #include <linux/mutex.h>
 
 #define SUCCESS 0
-#define DEVICE_NAME "outputDev"	//device name as it appears in /proc/devices
-#define CLASS_NAME "outputClass"
+#define DEVICE_NAME "outputdevice"	//device name as it appears in /proc/devices
+#define CLASS_NAME "chardriverR"
 #define BUFF_LEN 1024			//max length of message
 
 MODULE_LICENSE("GPL");
