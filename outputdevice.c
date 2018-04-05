@@ -24,9 +24,9 @@ MODULE_DESCRIPTION("Assignment 3 COP4600");
 MODULE_VERSION("1.0");
 
 static int 		Major;	//major number assigned to our device driver
-extern static char 	*msg;	//the msg the device will give when asked
+extern  char 	*msg;	//the msg the device will give when asked
 static int 		counter = 0;
-extern static short	size_of_message;
+extern  short	size_of_message;
 extern struct mutex charMutex;
 static struct 	class* charClass = NULL;
 static struct 	device* charDevice = NULL;
@@ -166,7 +166,7 @@ static int dev_release(struct inode *inode, struct file *file)
 
 static ssize_t dev_write(struct file *filp, const char *buff, size_t length, loff_t * off)
 {
-	printf("The output module does not support writing.\n");
+	printk(KERN_ALERT "The output module does not support writing.\n");
 
 	return -EFAULT;
 }
