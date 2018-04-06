@@ -19,7 +19,7 @@ account for mutex locks in code
 #define BUFF_LEN 1024			//max length of message
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Erick Evangeliste, Eric Watson, Alexander ALvarez, Brandon Bradley");
+MODULE_AUTHOR("Erick Evangeliste, Eric Watson, Alexander ALvarez");
 MODULE_DESCRIPTION("Assignment 3 COP4600");
 MODULE_VERSION("1.0");
 
@@ -40,6 +40,7 @@ static struct file_operations fops =
 {
 	.open = dev_open,
 	.read = dev_read,
+	//.write = dev_write,
 	.release = dev_release,
 };
 
@@ -109,45 +110,74 @@ static int dev_open(struct inode *inode, struct file *file)
 	return 0;
 }
 
-static ssize_t dev_read(struct file * filp, char *buffer, size_t length, loff_t * offset)
+static ssize_t dev_read(struct file * filp, char *buffer, size_t len, loff_t * offset)
 {
-	//number of bytes actually written to the buffer
-	int i, temp, error_count = copy_to_user(buffer, msgptr, length); //copy to user returns how many bytes were not copied
-
-	if(error_count == 0)
-	{
-		for(i = 0; i < BUFF_LEN; i++)
-		{
-			if(i < (BUFF_LEN - length))
-				msgptr[i] = msgptr[i + length];
-			else
-				msgptr[i] = '\0';
-		}
-
-		size_of_message -= length;
-		printk(KERN_INFO "Output: User has obtained %d characters from system, %d bytes are available\n", length, BUFF_LEN - size_of_message);
-
-		return length;
-	}
-	else
-	{
-		for(i = 0; i < BUFF_LEN; i++)
-			msgptr[i] = '\0';
-
-		if(size_of_message > 1)
-		{
-			printk(KERN_INFO "Output: User has obtained %d characters from system, %d bytes are available\n", size_of_message, BUFF_LEN);
-			temp = size_of_message;
-			size_of_message = 0;
 	
-			
-
-			return temp;
-		}
-		else
-			return -EFAULT;
-	}
+	 int bytesnotread = 0;
+	 int x;
 	
+	 // handle variable size len - compare size of buffer currently to the length 
+	 if(size_of_message > len)
+	 {
+		 int buffersize = (size_of_message - len);
+
+		 // Will return the amount of bytes that were not successfully copied, returns 0 on sucess
+		 bytesnotread = copy_to_user(buffer, msgptr, len);
+
+
+		 // copy_to_user was succesful
+
+		 if(bytesnotread == 0)
+		 {
+			 printk(KERN_INFO "chardevice: User received %d chars from system\n", len); //null terminator included in len
+			 size_of_message = buffersize;
+			 	for(x = 0; x < BUFF_LEN; x++)
+			 	{
+			 		if(x < (BUFF_LEN-len))
+			 		{
+			 			msgptr[x]=msgptr[x+len];
+			 		}
+		 			else
+					{
+		 				msgptr[x]= '\0';
+		 			}
+		 		}
+		 	return 0;
+
+		
+	 	 }
+		// Upon failure to copy to user show an error
+		 else
+		 {
+		 	printk(KERN_INFO "chardevice: user has failed to receive %d chars from system\n", bytesnotread);
+		 	return -EFAULT;
+		 }
+	  }
+
+	
+		
+	 
+	 else
+	 {
+			 bytesnotread = copy_to_user(buffer, msgptr, size_of_message);
+			 
+			 if(bytesnotread == 0)
+			 {
+			 		printk(KERN_INFO "chardevice: user has received %d chars from system\n", size_of_message);
+				 for(x = 0; x < BUFF_LEN; x++)
+				 {
+				 		msgptr[x]= '\0';
+				 }
+				 return (size_of_message = 0);
+			 }
+			 
+			// Upon failure to copy to user show an error
+			 else
+			 {
+				 printk(KERN_INFO "chardevice: user has failed to obtain %d chars from system\n", bytesnotread);
+				 return -EFAULT;
+	 		  }
+	}
 	
 }
 

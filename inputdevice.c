@@ -12,13 +12,13 @@
 #define BUFF_LEN 1024			//max length of message
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Erick Evangeliste, Eric Watson, Alexander Alvarez, Brandon Bradley");
+MODULE_AUTHOR("Erick Evangeliste, Eric Watson, Alexander Alvarez");
 MODULE_DESCRIPTION("Assignment 3 COP4600");
 MODULE_VERSION("1.0");
 
 static int 		Major;					//major number assigned to our device driver
 static char 	msg[BUFF_LEN];	//the msg the device will give when as
-static char *msgptr;
+char *msgptr;
 static int 		counter = 0;
 int	size_of_message = 0;
 static struct 	class* charClass = NULL;
@@ -34,6 +34,7 @@ static ssize_t 	dev_write(struct file *, const char *, size_t, loff_t *);
 static struct file_operations fops =
 {
 	.open = dev_open,
+	//.read = dev_read,
 	.write = dev_write,
 	.release = dev_release,
 };
@@ -128,6 +129,7 @@ static ssize_t dev_write(struct file *filp, const char *buff, size_t length, lof
 		if(i > 1)
 		{
 			printk(KERN_INFO "Input: System has obtained %d characters from user, 0 bytes are available\n", i);
+			//mutex_unlock(&charMutex);
 			return i;
 		}
 		else
@@ -145,6 +147,7 @@ static ssize_t dev_write(struct file *filp, const char *buff, size_t length, lof
 		
 		size_of_message += length;
 		printk(KERN_INFO "Input: System has obtained %d characters from user, %d bytes are available\n", length, BUFF_LEN - size_of_message);
+		//mutex_unlock(&charMutex);
 		msgptr = msg;
 		return length;
 	}
