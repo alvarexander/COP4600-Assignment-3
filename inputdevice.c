@@ -124,10 +124,14 @@ static ssize_t dev_write(struct file *filp, const char *buff, size_t length, lof
 		if(i > 1)
 		{
 			printk(KERN_INFO "CharWrite: System has obtained %d characters from user, 0 bytes are available\n", i);
+			mutex_unlock(&charMutex);
 			return i;
 		}
 		else
+		{
+			mutex_unlock(&charMutex);
 			return -EFAULT;
+		}
 	}
 	else
 	{
@@ -138,7 +142,7 @@ static ssize_t dev_write(struct file *filp, const char *buff, size_t length, lof
 
 		size_of_message += length;
 		printk(KERN_INFO "CharWrite: System has obtained %d characters from user, %d bytes are available\n", length, BUFF_LEN - size_of_message);
-
+		mutex_unlock(&charMutex);
 		return length;
 	}
 }
