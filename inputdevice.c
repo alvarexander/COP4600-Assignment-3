@@ -12,7 +12,7 @@
 #define BUFF_LEN 1024			//max length of message
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Erick Evangeliste, Eric Watson, Alexander Alvarez");
+MODULE_AUTHOR("Erick Evangeliste, Eric Watson, Alexander Alvarez, Brandon Bradley");
 MODULE_DESCRIPTION("Assignment 3 COP4600");
 MODULE_VERSION("1.0");
 
