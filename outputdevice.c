@@ -19,7 +19,7 @@ account for mutex locks in code
 #define BUFF_LEN 1024			//max length of message
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Erick Evangeliste, Eric Watson, Alexander Alvarez, Brandon Bradley");
+MODULE_AUTHOR("Erick Evangeliste, Eric Watson, Alexander ALvarez, Brandon Bradley");
 MODULE_DESCRIPTION("Assignment 3 COP4600");
 MODULE_VERSION("1.0");
 
@@ -129,7 +129,7 @@ static ssize_t dev_read(struct file * filp, char *buffer, size_t len, loff_t * o
 
 		 if(bytesnotread == 0)
 		 {
-			 printk(KERN_INFO "chardevice: User received %d chars from system\n", len); //null terminator included in len
+			 printk(KERN_INFO "chardevice: User received %d chars from system [%s]\n", len, msgptr); //null terminator included in len
 			 size_of_message = buffersize;
 			 	for(x = 0; x < BUFF_LEN; x++)
 			 	{
@@ -163,7 +163,7 @@ static ssize_t dev_read(struct file * filp, char *buffer, size_t len, loff_t * o
 			 
 			 if(bytesnotread == 0)
 			 {
-			 		printk(KERN_INFO "chardevice: user has received %d chars from system\n", size_of_message);
+			 		printk(KERN_INFO "Output: user has received %d chars from system [%s]\n", size_of_message, msgptr);
 				 for(x = 0; x < BUFF_LEN; x++)
 				 {
 				 		msgptr[x]= '\0';
@@ -174,7 +174,7 @@ static ssize_t dev_read(struct file * filp, char *buffer, size_t len, loff_t * o
 			// Upon failure to copy to user show an error
 			 else
 			 {
-				 printk(KERN_INFO "chardevice: user has failed to obtain %d chars from system\n", bytesnotread);
+				 printk(KERN_INFO "Output: user has failed to obtain %d chars from system\n", bytesnotread);
 				 return -EFAULT;
 	 		  }
 	}
