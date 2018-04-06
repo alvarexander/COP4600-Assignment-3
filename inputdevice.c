@@ -7,8 +7,8 @@
 #include <linux/uaccess.h>
 
 #define SUCCESS 0
-#define DEVICE_NAME "chardevWrite"	//device name as it appears in /proc/devices
-#define CLASS_NAME "chardriver"
+#define DEVICE_NAME "inputdevice"	//device name as it appears in /proc/devices
+#define CLASS_NAME "chardriverW"
 #define BUFF_LEN 1024			//max length of message
 
 MODULE_LICENSE("GPL");
@@ -95,7 +95,7 @@ static int dev_open(struct inode *inode, struct file *file)
 {
       if(!mutex_trylock(&charMutex))
     {
-        printk(KERN_ALERT,"CharWrite: Device is being used by another process");
+        printk(KERN_ALERT "CharWrite: Device is being used by another process");
         return -EBUSY;
     }
 	counter++;
