@@ -18,6 +18,7 @@ MODULE_VERSION("1.0");
 
 static int 		Major;					//major number assigned to our device driver
 static char 	msg[BUFF_LEN];	//the msg the device will give when as
+static char *msgptr;
 static int 		counter = 0;
 int	size_of_message = 0;
 static struct 	class* charClass = NULL;
@@ -120,13 +121,15 @@ static ssize_t dev_write(struct file *filp, const char *buff, size_t length, lof
 		for(i = 0; i < (BUFF_LEN - size_of_message); i++)
 			msg[i + size_of_message] = buff[i];
 
+		msgptr = msg;
+
 		
 
 		size_of_message = BUFF_LEN;
 		if(i > 1)
 		{
 			printk(KERN_INFO "Input: System has obtained %d characters from user, 0 bytes are available\n", i);
-			mutex_unlock(&charMutex);
+			//mutex_unlock(&charMutex);
 			return i;
 		}
 		else
@@ -144,7 +147,8 @@ static ssize_t dev_write(struct file *filp, const char *buff, size_t length, lof
 		
 		size_of_message += length;
 		printk(KERN_INFO "Input: System has obtained %d characters from user, %d bytes are available\n", length, BUFF_LEN - size_of_message);
-		mutex_unlock(&charMutex);
+		//mutex_unlock(&charMutex);
+		msgptr = msg;
 		return length;
 	}
 }
@@ -158,6 +162,7 @@ static int dev_release(struct inode *inode, struct file *file)
 }
 EXPORT_SYMBOL(size_of_message);
 EXPORT_SYMBOL(msg);
+EXPORT_SYMBOL(msgptr);
 EXPORT_SYMBOL(charMutex);
 module_init(charDevice_init);
 module_exit(charDevice_exit);

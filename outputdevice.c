@@ -24,7 +24,7 @@ MODULE_DESCRIPTION("Assignment 3 COP4600");
 MODULE_VERSION("1.0");
 
 static int 		Major;	//major number assigned to our device driver
-extern  char 	*msg;	//the msg the device will give when asked
+extern  char 	*msgptr;	//the msg the device will give when asked
 static int 		counter = 0;
 extern  short	size_of_message;
 extern struct mutex charMutex;
@@ -113,31 +113,31 @@ static int dev_open(struct inode *inode, struct file *file)
 static ssize_t dev_read(struct file * filp, char *buffer, size_t length, loff_t * offset)
 {
 	//number of bytes actually written to the buffer
-	int i, temp, error_count = copy_to_user(buffer, msg, length); //copy to user returns how many bytes were not copied
+	int i, temp, error_count = copy_to_user(buffer, msgptr, length); //copy to user returns how many bytes were not copied
 
 	if(error_count == 0)
 	{
 		for(i = 0; i < BUFF_LEN; i++)
 		{
 			if(i < (BUFF_LEN - length))
-				msg[i] = msg[i + length];
+				msgptr[i] = msgptr[i + length];
 			else
-				msg[i] = '\0';
+				msgptr[i] = '\0';
 		}
 
 		size_of_message -= length;
 		printk(KERN_INFO "Output: User has obtained %d characters from system, %d bytes are available\n", length, BUFF_LEN - size_of_message);
 
-		mutex_unlock(&charMutex);
+		//mutex_unlock(&charMutex);
 
 		return length;
 	}
 	else
 	{
 		for(i = 0; i < BUFF_LEN; i++)
-			msg[i] = '\0';
+			msgptr[i] = '\0';
 
-		mutex_unlock(&charMutex);
+		//mutex_unlock(&charMutex);
 
 		if(size_of_message > 1)
 		{
