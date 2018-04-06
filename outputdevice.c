@@ -40,7 +40,6 @@ static struct file_operations fops =
 {
 	.open = dev_open,
 	.read = dev_read,
-	//.write = dev_write,
 	.release = dev_release,
 };
 
@@ -128,16 +127,12 @@ static ssize_t dev_read(struct file * filp, char *buffer, size_t length, loff_t 
 		size_of_message -= length;
 		printk(KERN_INFO "Output: User has obtained %d characters from system, %d bytes are available\n", length, BUFF_LEN - size_of_message);
 
-		//mutex_unlock(&charMutex);
-
 		return length;
 	}
 	else
 	{
 		for(i = 0; i < BUFF_LEN; i++)
 			msgptr[i] = '\0';
-
-		//mutex_unlock(&charMutex);
 
 		if(size_of_message > 1)
 		{
