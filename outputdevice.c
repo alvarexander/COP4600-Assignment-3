@@ -14,8 +14,8 @@ account for mutex locks in code
 #include <linux/mutex.h>
 
 #define SUCCESS 0
-#define DEVICE_NAME "outputdevice"	//device name as it appears in /proc/devices
-#define CLASS_NAME "chardriverR"
+#define DEVICE_NAME "outputDev"	//device name as it appears in /proc/devices
+#define CLASS_NAME "outputClass"
 #define BUFF_LEN 1024			//max length of message
 
 MODULE_LICENSE("GPL");
@@ -159,7 +159,6 @@ static ssize_t dev_read(struct file * filp, char *buffer, size_t length, loff_t 
 //called when a process closes the device file
 static int dev_release(struct inode *inode, struct file *file)
 {
-	mutex_unlock(&charMutex);
 	printk(KERN_INFO "Output: Device successfully closed\n");
 	return 0;
 }
